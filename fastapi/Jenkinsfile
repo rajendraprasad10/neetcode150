@@ -1,0 +1,49 @@
+pipline {
+    agent any 
+    
+    tools {
+        mvn: "maven.3.9.0"
+    }
+    
+    stages {
+        // get code from git
+        stage("Git Checkout") {
+            steps {
+                git branch: "dev", url: "gitlab.warehouse-backend.com"
+            }
+        }
+        
+        // check code from syntax errors
+        stage("Validate code") {
+            steps {
+                sh " mvn compile"
+            }
+        }
+        
+        // Static code analysis
+        stage("SAST") {
+            steps {
+                sh "mvn sonar:sonar" 
+            }
+        }
+        
+        // exicute the unit testing
+        stage("Test") {
+            steps {
+                sh "mvn test"
+            }
+        }
+        
+        stage("build") {
+            steps {
+                sh "mvn clean package"
+            }
+        }
+        # push to 
+        stage("deploy") {
+            steps {
+                sh "mvn deploy"
+            }
+        }
+    }
+}
